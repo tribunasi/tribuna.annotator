@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<layers>
+  <layer
+    name="tribuna.annotator"
+    interface="tribuna.annotator.interfaces.ITribunaAnnotatorLayer"
+  />
+</layers>

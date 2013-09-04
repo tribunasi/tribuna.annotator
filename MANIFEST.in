@@ -1,0 +1,2 @@
+graft src/tribuna
+include *.cfg *.rst *.in
