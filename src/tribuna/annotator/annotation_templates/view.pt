@@ -12,14 +12,15 @@
 </metal:block>
 
 <metal:block fill-slot="javascript_head_slot">
-  <script src="http://assets.annotateit.org/annotator/v1.2.7/annotator-full.min.js"></script>
+  <!--script src="http://assets.annotateit.org/annotator/v1.2.7/annotator-full.min.js"></script-->
+  <script src="http://assets.annotateit.org/annotator/v1.2.7/annotator-full.js"></script>
 </metal:block>
 
 <metal:main fill-slot="main">
 <tal:main-macro metal:define-macro="main"
                 tal:define="ploneview nocall:context/@@plone;">
   <div id="annotatorz"
-       tal:content="structure context/getText">Foo</div>
+       tal:content="structure context/getText|context/text|nothing">Foo</div>
   <script>
     $(function() {
         var content = $("#annotatorz").annotator()
