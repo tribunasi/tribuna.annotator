@@ -1,21 +1,23 @@
 <?xml version="1.0"?>
-<object name="tribuna.annotator.annotation" meta_type="Dexterity FTI"
-   i18n:domain="tribuna.content" xmlns:i18n="http://xml.zope.org/namespaces/i18n">
+<object name="tribuna.annotator.article" meta_type="Dexterity FTI"
+   i18n:domain="tribuna.annotator" xmlns:i18n="http://xml.zope.org/namespaces/i18n">
 
  <!-- Basic metadata -->
- <property name="title" i18n:translate="">Annotation</property>
- <property name="description" i18n:translate="">An annotation</property>
- <property name="content_icon">string:${portal_url}/document_icon.png</property>
- <property name="allow_discussion">False</property>
+ <property name="title" i18n:translate="">Article</property>
+ <property name="description" i18n:translate="">An article</property>
+ <property name="content_icon">user.gif</property>
+ <property name="allow_discussion">True</property>
  <property name="global_allow">True</property>
- <property name="filter_content_types">True</property>
- <property name="allowed_content_types" />
+ <property name="filter_content_types">False</property>
+ <!--property name="allowed_content_types">
+
+ </property-->
 
  <!-- schema interface -->
- <property name="schema">tribuna.annotator.annotation.IAnnotation</property>
+ <property name="schema">tribuna.annotator.article.IArticle</property>
 
  <!-- class used for content items -->
- <property name="klass">plone.dexterity.content.Item</property>
+ <property name="klass">plone.dexterity.content.Container</property>
 
  <!-- add permission -->
  <property name="add_permission">cmf.AddPortalContent</property>
@@ -23,8 +25,6 @@
  <!-- enabled behaviors -->
  <property name="behaviors">
      <element value="plone.app.content.interfaces.INameFromTitle" />
-     <!--element value="plone.app.dexterity.behaviors.metadata.IBasic" /-->
-     <!--element value="tribuna.content.behaviors.behaviors.ITags" /-->
  </property>
 
  <!-- View information -->
