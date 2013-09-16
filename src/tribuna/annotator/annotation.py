@@ -4,8 +4,10 @@
 
 from five import grok
 from plone import api
+from plone.dexterity.utils import createContent
 from plone.directives import form
 from zope import schema
+from zope.container.interfaces import INameChooser
 from zope.interface import Interface
 from zope.publisher.interfaces import IPublishTraverse
 from zExceptions import NotFound
@@ -148,24 +150,33 @@ class ManageAnnotationsView(grok.View):
             return jsonify(
                 self.request, 'No JSON sent. Annotation not created.')
 
+        # bypass security checks so that annonymous users can create an
+        # annotation
+        # XXX: this would be a bit cleaner if we used api.env.adopt_roles,
+        # but it doesn't seem to work in this case..
         article = self._get_article(data.get('url'))
         user_id = api.user.get_current().id
+        annotation = createContent(
+            'tribuna.annotator.annotation',
+            title=u'Annotation',
+            user=data.get('user', u''),
+            plone_user_id=user_id,
+            consumer=data.get('consumer', u''),
+            ranges=data['ranges'],
+            Subject=data['tags']
+        )
+        chooser = INameChooser(article)
+        newid = chooser.chooseName(None, annotation)
+        annotation.id = newid
+        article[newid] = annotation
 
-        # doesn't work
-        # with api.env.adopt_roles(['Manager', 'Member']):
+        # re-get the object from the folder so it is acquisition wrapped
+        annotation = article[newid]
 
-        with api.env.adopt_user(username='annotator'):
-            annotation = api.content.create(
-                title=u'Annotation',
-                container=article,
-                type='tribuna.annotator.annotation',
-                user=data.get('user', u''),
-                plone_user_id=user_id,
-                consumer=data.get('consumer', u''),
-                ranges=data['ranges'],
-                Subject=data['tags']
-            )
+        # publish the annotation
+        with api.env.adopt_roles(['Manager', 'Member']):
             api.content.transition(annotation, transition='publish')
+
         data.update({
             'created': annotation.created().ISO8601(),
             'updated': annotation.modified().ISO8601(),
