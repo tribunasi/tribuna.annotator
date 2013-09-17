@@ -14,13 +14,15 @@ class TestInstall(IntegrationTestCase):
         self.installer = api.portal.get_tool('portal_quickinstaller')
 
     def test_product_installed(self):
-        """Test if tribuna.annotator is installed with portal_quickinstaller."""
+        """Test if tribuna.annotator is installed with portal_quickinstaller.
+        """
         self.assertTrue(self.installer.isProductInstalled('tribuna.annotator'))
 
     def test_uninstall(self):
         """Test if tribuna.annotator is cleanly uninstalled."""
         self.installer.uninstallProducts(['tribuna.annotator'])
-        self.assertFalse(self.installer.isProductInstalled('tribuna.annotator'))
+        self.assertFalse(
+            self.installer.isProductInstalled('tribuna.annotator'))
 
     # browserlayer.xml
     def test_browserlayer(self):
