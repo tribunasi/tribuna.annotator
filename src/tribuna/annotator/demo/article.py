@@ -1,3 +1,4 @@
+from five import grok
 from plone.directives import form
 from tribuna.annotator.interfaces import ITribunaAnnotator
 from zope import schema
@@ -15,3 +16,10 @@ class IArticle(form.Schema, ITribunaAnnotator):
         title=u"Body text",
         required=False,
     )
+
+
+class AnnotationsView(grok.View):
+    """View for annotating text with the Annotator plugin."""
+    grok.context(ITribunaAnnotator)
+    grok.require('zope2.View')
+    grok.name('annotations-view')

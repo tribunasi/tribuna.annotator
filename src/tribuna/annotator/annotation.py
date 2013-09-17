@@ -4,6 +4,7 @@
 
 from five import grok
 from plone import api
+from plone.app.layout.viewlets.interfaces import IBelowContent
 from plone.directives import form
 from tribuna.annotator.utils import unrestricted_create
 from tribuna.annotator.interfaces import ITribunaAnnotator
@@ -13,6 +14,20 @@ from zope.publisher.interfaces import IPublishTraverse
 from zExceptions import NotFound
 
 import json
+
+
+ANNOTATOR_JS = """
+<script>
+    $(function() {
+        var content = $("#annotator").annotator();
+
+        content.annotator('addPlugin', 'Tags');
+        content.annotator('addPlugin', 'Store', {
+            // The endpoint of the store on your server.
+            prefix: '/%s',
+         });
+    });
+</script>"""
 
 
 def jsonify(request, data):
@@ -84,11 +99,14 @@ class AnnotationView(grok.View):
     grok.name('view')
 
 
-class AnnotationsView(grok.View):
-    """View for annotating text with the Annotator plugin."""
+class AnnotationsViewlet(grok.Viewlet):
+    """Viewlet which renders the annotator initialization code."""
     grok.context(ITribunaAnnotator)
     grok.require('zope2.View')
-    grok.name('annotations-view')
+    grok.viewletmanager(IBelowContent)
+
+    def render(self):
+        return ANNOTATOR_JS % api.portal.get().id
 
 
 class ManageAnnotationsView(grok.View):
