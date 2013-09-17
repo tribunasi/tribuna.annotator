@@ -4,7 +4,6 @@
 
 from five import grok
 from plone import api
-from plone.dexterity.utils import createContent
 from plone.directives import form
 from Products.Archetypes.interfaces.base import IBaseObject
 from zope import schema
@@ -185,20 +184,11 @@ class ManageAnnotationsView(grok.View):
             with api.env.adopt_roles(['Manager', 'Member']):
                 obj.aq_parent.manage_renameObject(content_id, new_id)
 
-        # works only for dexterity
-        # obj = createContent(portal_type, title=title, **kwargs)
-        #chooser = INameChooser(container)
-        #newid = chooser.chooseName(None, obj)
-        #obj.id = newid
-        #container[newid] = obj
-
-        # re-get the object from the folder so it is acquisition wrapped
-        # obj = container[newid]
-
         # perform a workflow transition
         if transition:
             with api.env.adopt_roles(['Manager', 'Member']):
                 api.content.transition(obj, transition=transition)
+
         return obj
 
     def _handle_POST(self):
