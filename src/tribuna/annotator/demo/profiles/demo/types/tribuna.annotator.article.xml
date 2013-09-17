@@ -11,6 +11,7 @@
  <property name="filter_content_types">True</property>
  <property name="allowed_content_types">
    <element value="tribuna.annotator.annotation" />
+   <element value="Folder" />
  </property>
 
  <!-- schema interface -->
@@ -28,10 +29,11 @@
  </property>
 
  <!-- View information -->
- <property name="default_view">view</property>
+ <property name="default_view">annotations-view</property>
  <property name="default_view_fallback">False</property>
  <property name="view_methods">
   <element value="view"/>
+  <element value="annotations-view"/>
  </property>
 
  <!-- Method aliases -->
