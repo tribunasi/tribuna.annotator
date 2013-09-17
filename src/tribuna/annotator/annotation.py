@@ -210,7 +210,10 @@ class ManageAnnotationsView(grok.View):
 
     def _get_article(self, url=None):
         if not url:
-            url = "/".join(self.request['HTTP_REFERER'].split("/")[:-1])
+            url = self.request['HTTP_REFERER'].strip("/").split("/")
+            if '@@' in url[-1]:
+                url = url[:-1]
+            url = "/".join(url)
         return self._get_obj_from_url(url)
 
     def _get_annotations(self):
