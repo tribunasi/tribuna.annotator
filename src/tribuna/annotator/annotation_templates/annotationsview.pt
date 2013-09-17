@@ -8,12 +8,11 @@
 <body>
 
 <metal:block fill-slot="style_slot">
-  <link rel="stylesheet" type="text/css" href="http://assets.annotateit.org/annotator/v1.2.7/annotator.min.css"/>
+  <link rel="stylesheet" type="text/css" href="++resource++tribuna.annotator/annotator.min.css"/>
 </metal:block>
 
 <metal:block fill-slot="javascript_head_slot">
-  <!--script src="http://assets.annotateit.org/annotator/v1.2.7/annotator-full.min.js"></script-->
-  <script src="http://assets.annotateit.org/annotator/v1.2.7/annotator-full.js"></script>
+  <script src="++resource++tribuna.annotator/annotator-full.js"></script>
 </metal:block>
 
 <metal:main fill-slot="main">
@@ -23,7 +22,7 @@
        tal:content="structure context/getText|context/text|nothing">Foo</div>
   <script>
     $(function() {
-        var content = $("#annotatorz").annotator()
+        var content = $("#annotatorz").annotator();
 
         content.annotator('addPlugin', 'Tags');
         content.annotator('addPlugin', 'Store', {
