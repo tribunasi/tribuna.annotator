@@ -6,6 +6,7 @@ from five import grok
 from plone import api
 from plone.dexterity.utils import createContent
 from plone.directives import form
+from Products.Archetypes.interfaces.base import IBaseObject
 from zope import schema
 from zope.container.interfaces import INameChooser
 from zope.interface import Interface
@@ -13,6 +14,8 @@ from zope.publisher.interfaces import IPublishTraverse
 from zExceptions import NotFound
 
 import json
+import random
+import transaction
 
 
 def jsonify(request, data):
@@ -142,6 +145,62 @@ class ManageAnnotationsView(grok.View):
         """Handle GET requests - return all saved annotations"""
         return jsonify(self.request, self._get_annotations())
 
+    @api.validation.required_parameters('container', 'portal_type')
+    @api.validation.at_least_one_of('id', 'title')
+    def _unrestricted_create(self, container=None, portal_type=None,
+                             id=None, title=None, transition=None, **kwargs):
+        """Create content, bypassing security checks.
+
+        XXX: this would be a bit cleaner if we used api.env.adopt_roles,
+        but it doesn't seem to work properly..
+
+        :param container: container for the created object
+        :param portal_type: type of the object to create
+        :param id: id of the object to create
+        :param title: title of the object to create
+        :param transition: name of a workflow transition to perform after
+            creation
+        :param kwargs: additional parameters which are passed to the
+            createContent function (e.g. title, description etc.)
+        :returns: object that was created
+        """
+        portal_types = api.portal.get_tool("portal_types")
+        type_info = portal_types.getTypeInfo(portal_type)
+        content_id = id or str(random.randint(0, 99999999))
+        obj = type_info._constructInstance(
+            container, content_id, title=title, **kwargs)
+
+        # Archetypes specific code
+        if IBaseObject.providedBy(obj):
+            # Will finish Archetypes content item creation process,
+            # rename-after-creation and such
+            obj.processForm()
+
+        if not id:
+            # Create a new id from title
+            chooser = INameChooser(container)
+            derived_id = id or title
+            new_id = chooser.chooseName(derived_id, obj)
+            transaction.savepoint(optimistic=True)
+            with api.env.adopt_roles(['Manager', 'Member']):
+                obj.aq_parent.manage_renameObject(content_id, new_id)
+
+        # works only for dexterity
+        # obj = createContent(portal_type, title=title, **kwargs)
+        #chooser = INameChooser(container)
+        #newid = chooser.chooseName(None, obj)
+        #obj.id = newid
+        #container[newid] = obj
+
+        # re-get the object from the folder so it is acquisition wrapped
+        # obj = container[newid]
+
+        # perform a workflow transition
+        if transition:
+            with api.env.adopt_roles(['Manager', 'Member']):
+                api.content.transition(obj, transition=transition)
+        return obj
+
     def _handle_POST(self):
         """Handle POST request - create a new annotation."""
         data = self._get_data()
@@ -150,33 +209,30 @@ class ManageAnnotationsView(grok.View):
             return jsonify(
                 self.request, 'No JSON sent. Annotation not created.')
 
-        # bypass security checks so that annonymous users can create an
-        # annotation
-        # XXX: this would be a bit cleaner if we used api.env.adopt_roles,
-        # but it doesn't seem to work in this case..
+        # create a container for annotations, if it doesn't exist yet
         article = self._get_article(data.get('url'))
+        container = article.get('annotations-folder', None)
+        if not container:
+            container = self._unrestricted_create(
+                container=article,
+                portal_type='Folder',
+                title=u'Annotations folder',
+                transition='publish'
+            )
+
+        # create an annotation
         user_id = api.user.get_current().id
-        annotation = createContent(
-            'tribuna.annotator.annotation',
+        annotation = self._unrestricted_create(
+            container=container,
+            portal_type='tribuna.annotator.annotation',
             title=u'Annotation',
+            transition='publish',
             user=data.get('user', u''),
             plone_user_id=user_id,
             consumer=data.get('consumer', u''),
             ranges=data['ranges'],
             Subject=data['tags']
         )
-        chooser = INameChooser(article)
-        newid = chooser.chooseName(None, annotation)
-        annotation.id = newid
-        article[newid] = annotation
-
-        # re-get the object from the folder so it is acquisition wrapped
-        annotation = article[newid]
-
-        # publish the annotation
-        with api.env.adopt_roles(['Manager', 'Member']):
-            api.content.transition(annotation, transition='publish')
-
         data.update({
             'created': annotation.created().ISO8601(),
             'updated': annotation.modified().ISO8601(),
@@ -220,7 +276,7 @@ class ManageAnnotationsView(grok.View):
 
         brains = catalog(
             portal_type='tribuna.annotator.annotation',
-            path={"query": path, "depth": 1}
+            path={"query": path, "depth": 2}
         )
         annotations = []
         for brain in brains:
