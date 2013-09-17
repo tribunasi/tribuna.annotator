@@ -165,7 +165,7 @@ class ManageAnnotationsView(grok.View):
             )
 
         # create an annotation
-        user_id = api.user.get_current().id
+        user_id = api.user.get_current().getUserName()
         annotation = unrestricted_create(
             container=container,
             portal_type='tribuna.annotator.annotation',
