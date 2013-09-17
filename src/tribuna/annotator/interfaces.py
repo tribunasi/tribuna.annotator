@@ -10,18 +10,23 @@ class ITribunaAnnotatorLayer(IDefaultPloneLayer):
 
 
 class ITribunaAnnotator(Interface):
-    """Support adding annotations to parts of the text. Your content type
-    should provide this interface for annotations to work.
+    """Support adding annotations to parts of the text. See
+    http://okfnlabs.org/annotator/ for more info.
 
-    Annotator expects a folderish type, because we store annotations as
-    normal plone objects inside 'annotations-folder' folder inside the
-    ITribunaAnnotator implementer. We also need a 'text' field on which
-    the annotator operates.
+    To enable the annotation on your content type:
 
-    XXX: We should store annotations similar to what plone.app.discussion
-    does
+      * Your content type needs to provide this interface
 
-    XXX: I tried applying it as a marker interface with a behavior, but
-    it didn't seem to work (interface was there, but we'd have to manually
-    enable it for each object)
+      * Content type needs to be folderish, because we store annotations as
+        normal plone objects inside 'annotations-folder' subfolder.
+
+        XXX: We should store annotations similar to what plone.app.discussion
+        does
+
+    * You need to have an element with id "annotator" in the content type
+      template.
+
+    XXX: I tried applying this interface as a marker interface with a
+    behavior, but it didn't seem to work (interface was there, but we'd
+    have to manually enable it for each object)
     """
