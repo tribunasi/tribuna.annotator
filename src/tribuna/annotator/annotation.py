@@ -13,6 +13,7 @@ from zExceptions import NotFound
 
 import json
 
+
 def jsonify(request, data):
     json_data = json.dumps(data)
     request.response.setHeader("Content-type", "application/json")
@@ -25,6 +26,10 @@ class IAnnotation(form.Schema):
     form.primary('title')
     title = schema.TextLine(
         title=u"Name",
+    )
+
+    text = schema.Text(
+        title=u"Text",
     )
 
     quote = schema.Text(
@@ -166,6 +171,8 @@ class ManageAnnotationsView(grok.View):
             portal_type='tribuna.annotator.annotation',
             title=u'Annotation',
             transition='publish',
+            text=data.get('text', u''),
+            quote=data.get('quote', u''),
             user=data.get('user', u''),
             plone_user_id=user_id,
             consumer=data.get('consumer', u''),
@@ -227,7 +234,7 @@ class ManageAnnotationsView(grok.View):
                 'quote': annotation.quote,
                 'ranges': annotation.ranges,
                 'tags': annotation.Subject,
-                'text': '',
+                'text': annotation.text,
                 'updated': annotation.modified().ISO8601()
             })
 
