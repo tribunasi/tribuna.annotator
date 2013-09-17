@@ -7,14 +7,6 @@
       i18n:domain="tribuna.annotator">
 <body>
 
-<metal:block fill-slot="style_slot">
-  <link rel="stylesheet" type="text/css" href="++resource++tribuna.annotator/annotator.min.css"/>
-</metal:block>
-
-<metal:block fill-slot="javascript_head_slot">
-  <script src="++resource++tribuna.annotator/annotator-full.js"></script>
-</metal:block>
-
 <metal:main fill-slot="main">
 <tal:main-macro metal:define-macro="main"
                 tal:define="ploneview nocall:context/@@plone;">
