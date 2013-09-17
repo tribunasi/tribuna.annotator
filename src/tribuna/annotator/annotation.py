@@ -55,35 +55,32 @@ class IAnnotation(form.Schema):
     )
 
 
-class AnnotationJSONView(grok.View):
-    """View for the Annotation content type which returns annotation data
-    in JSON format.
-    """
+#class AnnotationJSONView(grok.View):
+#    """View for the Annotation content type which returns annotation data
+#    in JSON format.
+#    """
+#    grok.context(IAnnotation)
+#    grok.require('zope2.View')
+#    grok.name('view')
+#
+#    def render(self):
+#        annotation = self.context
+#        annotation_data = {
+#            'created': annotation.created().ISO8601(),
+#            'id': annotation.id,
+#            'quote': annotation.quote,
+#            'ranges': annotation.ranges,
+#            'tags': annotation.Subject,
+#            'text': '',
+#            'updated': annotation.modified().ISO8601()
+#        }
+#        return jsonify(self.request, annotation_data)
+
+
+class AnnotationView(grok.View):
     grok.context(IAnnotation)
     grok.require('zope2.View')
     grok.name('view')
-
-    def render(self):
-        annotation = self.context
-        annotation_data = {
-            'created': annotation.created().ISO8601(),
-            'id': annotation.id,
-            'quote': annotation.quote,
-            'ranges': annotation.ranges,
-            'tags': annotation.Subject,
-            'text': '',
-            'updated': annotation.modified().ISO8601()
-        }
-        return jsonify(self.request, annotation_data)
-
-
-class AnnotationHtmlView(grok.View):
-    grok.context(IAnnotation)
-    grok.require('zope2.View')
-    grok.name('base-view')
-
-    def render(self):
-        return ""
 
 
 class AnnotationsView(grok.View):
@@ -163,6 +160,7 @@ class ManageAnnotationsView(grok.View):
                 title=u'Annotations folder',
                 transition='publish'
             )
+            container.setLayout('folder_full_view')
 
         # create an annotation
         user_id = api.user.get_current().getUserName()
