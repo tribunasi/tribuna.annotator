@@ -1,0 +1,15 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    i18n_domain="tribuna.annotator">
+
+    <!-- Register the installation GenericSetup extension profile -->
+    <genericsetup:registerProfile
+        name="demo"
+        title="tribuna.annotator (demo)"
+        directory="profiles/demo"
+        description="Install a demo content type for testing tribuna.annotator."
+        provides="Products.GenericSetup.interfaces.EXTENSION"
+        />
+
+</configure>
