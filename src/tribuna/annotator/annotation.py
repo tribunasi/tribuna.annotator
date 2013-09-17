@@ -5,17 +5,13 @@
 from five import grok
 from plone import api
 from plone.directives import form
-from Products.Archetypes.interfaces.base import IBaseObject
+from tribuna.annotator.utils import unrestricted_create
 from zope import schema
-from zope.container.interfaces import INameChooser
 from zope.interface import Interface
 from zope.publisher.interfaces import IPublishTraverse
 from zExceptions import NotFound
 
 import json
-import random
-import transaction
-
 
 def jsonify(request, data):
     json_data = json.dumps(data)
@@ -144,53 +140,6 @@ class ManageAnnotationsView(grok.View):
         """Handle GET requests - return all saved annotations"""
         return jsonify(self.request, self._get_annotations())
 
-    @api.validation.required_parameters('container', 'portal_type')
-    @api.validation.at_least_one_of('id', 'title')
-    def _unrestricted_create(self, container=None, portal_type=None,
-                             id=None, title=None, transition=None, **kwargs):
-        """Create content, bypassing security checks.
-
-        XXX: this would be a bit cleaner if we used api.env.adopt_roles,
-        but it doesn't seem to work properly..
-
-        :param container: container for the created object
-        :param portal_type: type of the object to create
-        :param id: id of the object to create
-        :param title: title of the object to create
-        :param transition: name of a workflow transition to perform after
-            creation
-        :param kwargs: additional parameters which are passed to the
-            createContent function (e.g. title, description etc.)
-        :returns: object that was created
-        """
-        portal_types = api.portal.get_tool("portal_types")
-        type_info = portal_types.getTypeInfo(portal_type)
-        content_id = id or str(random.randint(0, 99999999))
-        obj = type_info._constructInstance(
-            container, content_id, title=title, **kwargs)
-
-        # Archetypes specific code
-        if IBaseObject.providedBy(obj):
-            # Will finish Archetypes content item creation process,
-            # rename-after-creation and such
-            obj.processForm()
-
-        if not id:
-            # Create a new id from title
-            chooser = INameChooser(container)
-            derived_id = id or title
-            new_id = chooser.chooseName(derived_id, obj)
-            transaction.savepoint(optimistic=True)
-            with api.env.adopt_roles(['Manager', 'Member']):
-                obj.aq_parent.manage_renameObject(content_id, new_id)
-
-        # perform a workflow transition
-        if transition:
-            with api.env.adopt_roles(['Manager', 'Member']):
-                api.content.transition(obj, transition=transition)
-
-        return obj
-
     def _handle_POST(self):
         """Handle POST request - create a new annotation."""
         data = self._get_data()
@@ -203,7 +152,7 @@ class ManageAnnotationsView(grok.View):
         article = self._get_article(data.get('url'))
         container = article.get('annotations-folder', None)
         if not container:
-            container = self._unrestricted_create(
+            container = unrestricted_create(
                 container=article,
                 portal_type='Folder',
                 title=u'Annotations folder',
@@ -212,7 +161,7 @@ class ManageAnnotationsView(grok.View):
 
         # create an annotation
         user_id = api.user.get_current().id
-        annotation = self._unrestricted_create(
+        annotation = unrestricted_create(
             container=container,
             portal_type='tribuna.annotator.annotation',
             title=u'Annotation',
@@ -248,6 +197,7 @@ class ManageAnnotationsView(grok.View):
         return json.loads(self.request.get('BODY'))
 
     def _get_obj_from_url(self, url):
+        """Return object for the provided url."""
         portal_url = api.portal.get().absolute_url()
         obj_path = url.replace(portal_url, '')
         return api.content.get(path=obj_path)
