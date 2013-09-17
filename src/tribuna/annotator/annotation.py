@@ -6,6 +6,7 @@ from five import grok
 from plone import api
 from plone.directives import form
 from tribuna.annotator.utils import unrestricted_create
+from tribuna.annotator.interfaces import ITribunaAnnotator
 from zope import schema
 from zope.interface import Interface
 from zope.publisher.interfaces import IPublishTraverse
@@ -85,7 +86,7 @@ class AnnotationView(grok.View):
 
 class AnnotationsView(grok.View):
     """View for annotating text with the Annotator plugin."""
-    grok.context(Interface)
+    grok.context(ITribunaAnnotator)
     grok.require('zope2.View')
     grok.name('annotations-view')
 
