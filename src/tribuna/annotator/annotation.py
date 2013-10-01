@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 """The Annotation content type."""
 
@@ -14,6 +13,8 @@ from zope.publisher.interfaces import IPublishTraverse
 from zExceptions import NotFound
 
 import json
+
+from tribuna.content.utils import our_unicode
 
 
 ANNOTATOR_JS = """
@@ -169,38 +170,82 @@ class ManageAnnotationsView(grok.View):
             return jsonify(
                 self.request, 'No JSON sent. Annotation not created.')
 
-        # create a container for annotations, if it doesn't exist yet
-        article = self._get_article(data.get('url'))
-        container = article.get('annotations-folder', None)
-        if not container:
-            container = unrestricted_create(
-                container=article,
-                portal_type='Folder',
-                title=u'Annotations folder',
-                transition='publish'
-            )
-            container.setLayout('folder_full_view')
+        # Get all 'new' tags
+        # XXX
+        # FIX
+        with api.env.adopt_user('tags_user'):
+            catalog = api.portal.get_tool(name='portal_catalog')
+            items = catalog({
+                'portal_type': 'tribuna.content.tag',
+            })
 
-        # create an annotation
-        user_id = api.user.get_current().getUserName()
-        annotation = unrestricted_create(
-            container=container,
-            portal_type='tribuna.annotator.annotation',
-            title=u'Annotation',
-            transition='publish',
-            text=data.get('text', u''),
-            quote=data.get('quote', u''),
-            user=data.get('user', u''),
-            plone_user_id=user_id,
-            consumer=data.get('consumer', u''),
-            ranges=data['ranges'],
-            Subject=data['tags']
-        )
-        data.update({
-            'created': annotation.created().ISO8601(),
-            'updated': annotation.modified().ISO8601(),
-            'id': annotation.UID()
-        })
+            # Compare tags with the one already in our system, if they're the
+            # "same" (lower and ignore spaces), use those tags
+            titles = dict(
+                (our_unicode(it.Title).lower().replace(' ', ''), it.Title)
+                for it in items
+            )
+
+            value = data['tags']
+            dict_value = {}
+            for it in value:
+                foo = our_unicode(it).lower().replace(' ', '')
+                if foo not in dict_value.keys():
+                    dict_value[foo] = it
+
+            new_value = []
+            added_values = []
+
+            for key, val in dict_value.items():
+                if key in titles.keys():
+                    new_value.append(our_unicode(titles[key]))
+                else:
+                    new_value.append(our_unicode(val))
+                    added_values.append(our_unicode(val))
+
+            site = api.portal.get()
+            for title in added_values:
+                obj = api.content.create(
+                    type='tribuna.content.tag',
+                    title=title,
+                    description="",
+                    highlight_in_navigation=False,
+                    container=site['tags-folder'])
+                api.content.transition(obj=obj, transition='submit')
+
+            # create a container for annotations, if it doesn't exist yet
+            article = self._get_article(data.get('url'))
+            container = article.get('annotations-folder', None)
+            if not container:
+                container = unrestricted_create(
+                    container=article,
+                    portal_type='Folder',
+                    title=u'Annotations folder',
+                    transition='publish'
+                )
+                container.setLayout('folder_full_view')
+
+            # create an annotation
+            user_id = api.user.get_current().getUserName()
+            annotation = unrestricted_create(
+                container=container,
+                portal_type='tribuna.annotator.annotation',
+                title=u'Annotation',
+                transition='publish',
+                text=data.get('text', u''),
+                quote=data.get('quote', u''),
+                user=data.get('user', u''),
+                plone_user_id=user_id,
+                consumer=data.get('consumer', u''),
+                ranges=data['ranges'],
+                Subject=new_value
+            )
+            data.update({
+                'created': annotation.created().ISO8601(),
+                'updated': annotation.modified().ISO8601(),
+                'id': annotation.UID()
+            })
+
         return jsonify(self.request, data)
 
     def _handle_PUT(self):
