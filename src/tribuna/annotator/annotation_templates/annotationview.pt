@@ -4,14 +4,62 @@
       xmlns:i18n="http://xml.zope.org/namespaces/i18n"
       lang="en"
       metal:use-macro="context/main_template/macros/master"
-      i18n:domain="tribuna.annotator">
+      i18n:domain="tribuna.content">
 <body>
-  <metal:content-core fill-slot="content-core">
-    <metal:content-core  define-macro="content-core">
-      <div tal:replace="structure context/quote|nothing">
-        quote
+<metal:block fill-slot="style_slot">
+</metal:block>
+
+<metal:main fill-slot="main">
+<tal:main-macro metal:define-macro="main"
+                tal:define="ploneview nocall:context/@@plone;
+                            utilsview nocall:context/@@utils">
+
+  <div id="article" class="row-fluid ">
+
+    <div id="left-column" class="span2">
+      <div id="selected-tags">
+        <div id="selected-tags-list"
+             tal:define="selected_tags utilsview/get_selected_tags"
+             tal:condition="selected_tags">
+          <span tal:repeat="tag selected_tags"
+                class="selected"
+                tal:content="tag">tag</span>
+          <!--span tal:repeat="tag context/subject"
+                class="selected" tal:content="tag">tag</span-->
+        </div>
       </div>
-    </metal:content-core>
-  </metal:content-core>
+    </div>
+
+    <div id="article-annotation" class="articles-article-body span6">
+      <img tal:attributes="src string:++theme++tribuna.diazotheme/img/blank.gif" />
+      <div class="fit-text">
+        <p>
+          <span class="annotation-text"
+              tal:replace="structure context/quote|nothing">Annotation</span>
+        </p>
+      </div>
+      <a class="content-link" href="#"
+         i18n:translate=""
+         tal:attributes="href python: context.__parent__.__parent__.absolute_url()">link to the article</a> →
+      <div id="annotation-info">
+        <span tal:define="creator context/Creator;
+                     mtool context/@@plone_tools/membership;
+                     author python:mtool.getMemberInfo(creator)"
+               tal:content="python:author and author['fullname'] or creator">
+          Author name
+        </span>
+        <span tal:define="DateTime python:modules['DateTime'].DateTime;"
+              tal:replace="python:context.toLocalizedTime(context.modification_date)" />
+      </div>
+      <div id="annotation-tags-info">
+          <p class="annotationTag" tal:content="python: ', '.join(context.subject)" />
+      </div>
+      <div class="red redTag" i18n:translate="">annotation</div>
+    </div>
+  </div>
+
+</tal:main-macro>
+</metal:main>
+
 </body>
 </html>

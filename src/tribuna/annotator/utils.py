@@ -52,3 +52,28 @@ def unrestricted_create(container=None, portal_type=None,
             api.content.transition(obj, transition=transition)
 
     return obj
+
+
+def get_annotations(path):
+        """Return a list of annotations."""
+
+        catalog = api.portal.get_tool('portal_catalog')
+
+        brains = catalog(
+            portal_type='tribuna.annotator.annotation',
+            path={"query": path, "depth": 2}
+        )
+        annotations = []
+        for brain in brains:
+            annotation = brain.getObject()
+            annotations.append({
+                'created': annotation.created().ISO8601(),
+                'id': annotation.UID(),
+                'quote': annotation.quote,
+                'ranges': annotation.ranges,
+                'tags': annotation.Subject(),
+                'text': annotation.text,
+                'updated': annotation.modified().ISO8601()
+            })
+
+        return annotations

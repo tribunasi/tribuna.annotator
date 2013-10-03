@@ -238,8 +238,8 @@ class ManageAnnotationsView(grok.View):
                 plone_user_id=user_id,
                 consumer=data.get('consumer', u''),
                 ranges=data['ranges'],
-                Subject=new_value
             )
+            annotation.setSubject(tuple(new_value))
             data.update({
                 'created': annotation.created().ISO8601(),
                 'updated': annotation.modified().ISO8601(),
@@ -301,7 +301,7 @@ class ManageAnnotationsView(grok.View):
                 'id': annotation.UID(),
                 'quote': annotation.quote,
                 'ranges': annotation.ranges,
-                'tags': annotation.Subject,
+                'tags': annotation.Subject(),
                 'text': annotation.text,
                 'updated': annotation.modified().ISO8601()
             })
