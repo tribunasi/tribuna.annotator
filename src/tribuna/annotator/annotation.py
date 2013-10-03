@@ -269,9 +269,9 @@ class ManageAnnotationsView(grok.View):
         """Return object for the provided url."""
         portal_url = api.portal.get().absolute_url()
         obj_path = url.replace(portal_url, '')
-        # XXX: temp hack since we have "articles" folder for storing
+        # XXX: temp hack since we have "articles-folder" folder for storing
         # the articles and @@articles fancy view for displaying them
-        obj_path = obj_path.replace('@@', '')
+        obj_path = obj_path.replace('/articles/', '/articles-folder/')
         return api.content.get(path=obj_path)
 
     def _get_article(self, url=None):
