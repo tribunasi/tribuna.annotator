@@ -15,6 +15,7 @@ from zExceptions import NotFound
 import json
 
 from tribuna.content.utils import our_unicode
+from tribuna.content.utils import tags_string_to_list
 
 
 ANNOTATOR_JS = """
@@ -98,6 +99,9 @@ class AnnotationView(grok.View):
     grok.context(IAnnotation)
     grok.require('zope2.View')
     grok.name('view')
+
+    def get_selected_tags(self):
+        return tags_string_to_list(self.request.form.get('tags'))
 
 
 class AnnotationsViewlet(grok.Viewlet):
@@ -203,48 +207,48 @@ class ManageAnnotationsView(grok.View):
                     new_value.append(our_unicode(val))
                     added_values.append(our_unicode(val))
 
-            site = api.portal.get()
-            for title in added_values:
-                obj = api.content.create(
-                    type='tribuna.content.tag',
-                    title=title,
-                    description="",
-                    highlight_in_navigation=False,
-                    container=site['tags-folder'])
-                api.content.transition(obj=obj, transition='submit')
+        site = api.portal.get()
+        for title in added_values:
+            obj = api.content.create(
+                type='tribuna.content.tag',
+                title=title,
+                description="",
+                highlight_in_navigation=False,
+                container=site['tags-folder'])
+            api.content.transition(obj=obj, transition='submit')
 
-            # create a container for annotations, if it doesn't exist yet
-            article = self._get_article(data.get('url'))
-            container = article.get('annotations-folder', None)
-            if not container:
-                container = unrestricted_create(
-                    container=article,
-                    portal_type='Folder',
-                    title=u'Annotations folder',
-                    transition='publish'
-                )
-                container.setLayout('folder_full_view')
-
-            # create an annotation
-            user_id = api.user.get_current().getUserName()
-            annotation = unrestricted_create(
-                container=container,
-                portal_type='tribuna.annotator.annotation',
-                title=u'Annotation',
-                transition='publish',
-                text=data.get('text', u''),
-                quote=data.get('quote', u''),
-                user=data.get('user', u''),
-                plone_user_id=user_id,
-                consumer=data.get('consumer', u''),
-                ranges=data['ranges'],
+        # create a container for annotations, if it doesn't exist yet
+        article = self._get_article(data.get('url'))
+        container = article.get('annotations-folder', None)
+        if not container:
+            container = unrestricted_create(
+                container=article,
+                portal_type='Folder',
+                title=u'Annotations folder',
+                transition='publish'
             )
-            annotation.setSubject(tuple(new_value))
-            data.update({
-                'created': annotation.created().ISO8601(),
-                'updated': annotation.modified().ISO8601(),
-                'id': annotation.UID()
-            })
+            container.setLayout('folder_full_view')
+
+        # create an annotation
+        user_id = api.user.get_current().getUserName()
+        annotation = unrestricted_create(
+            container=container,
+            portal_type='tribuna.annotator.annotation',
+            title=u'Annotation',
+            transition='publish',
+            text=data.get('text', u''),
+            quote=data.get('quote', u''),
+            user=data.get('user', u''),
+            plone_user_id=user_id,
+            consumer=data.get('consumer', u''),
+            ranges=data['ranges'],
+        )
+        annotation.setSubject(tuple(new_value))
+        data.update({
+            'created': annotation.created().ISO8601(),
+            'updated': annotation.modified().ISO8601(),
+            'id': annotation.UID()
+        })
 
         return jsonify(self.request, data)
 
