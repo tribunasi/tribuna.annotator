@@ -103,6 +103,35 @@ class AnnotationView(grok.View):
     def get_selected_tags(self):
         return tags_string_to_list(self.request.form.get('tags'))
 
+    def get_article_url(self):
+        """
+        Get URL of the article this annotation belongs to.
+
+        :returns: URL of the article
+        :rtype:   String
+        """
+        unwanted = ['type', 'comment', 'id']
+
+        getArgs = ''
+        for name in self.request.form:
+            if name not in unwanted:
+                getArgs += '&' + name + '=' + self.request.form[name]
+
+        if getArgs:
+            getArgs = '?' + getArgs[1:]
+
+        article_url = self.context.portal_url()
+
+        # First parent: Annotation
+        # Second parent: Annotations folder
+        # Third parent: Article that we annotated
+        article_url += '/articles/{0}{1}#enableannotations'.format(
+            self.__parent__.__parent__.__parent__.id,
+            getArgs,
+        )
+
+        return article_url
+
 
 class AnnotationsViewlet(grok.Viewlet):
     """Viewlet which renders the annotator initialization code."""
@@ -249,6 +278,7 @@ class ManageAnnotationsView(grok.View):
             'updated': annotation.modified().ISO8601(),
             'id': annotation.UID()
         })
+        annotation.reindexObject()
 
         return jsonify(self.request, data)
 
@@ -280,7 +310,14 @@ class ManageAnnotationsView(grok.View):
 
     def _get_article(self, url=None):
         if not url:
-            url = self.request['HTTP_REFERER'].strip("/").split("/")
+            url = self.request['HTTP_REFERER']
+
+            # Remove the GET parameters if we have them
+            get_position = url.find('?')
+            if get_position != -1:
+                url = url[:get_position]
+
+            url = url.strip("/").split("/")
             if '@@' in url[-1]:
                 url = url[:-1]
             url = "/".join(url)

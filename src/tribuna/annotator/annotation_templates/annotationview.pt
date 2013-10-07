@@ -39,7 +39,7 @@
       </div>
       <a class="content-link" href="#"
          i18n:translate=""
-         tal:attributes="href python: context.__parent__.__parent__.absolute_url()">link to the article</a> →
+         tal:attributes="href view/get_article_url">link to the article</a> →
       <div id="annotation-info">
         <span tal:define="creator context/Creator;
                      mtool context/@@plone_tools/membership;
