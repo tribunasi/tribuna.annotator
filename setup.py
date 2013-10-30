@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Installer for the tribuna.annotator package."""
 
 from setuptools import find_packages
@@ -36,14 +35,15 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
+        'collective.dexteritytextindexer',
         'five.grok',
         'five.pt',
         'Pillow',
         'Plone',
         'plone.api',
         'plone.app.dexterity',
-        'plone.directives.form',
         'plone.behavior',
+        'plone.directives.form',
         'plone.directives.form',
         'setuptools',
         'z3c.jbot',

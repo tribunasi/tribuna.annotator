@@ -1,16 +1,17 @@
-
 """The Annotation content type."""
 
+from collective import dexteritytextindexer
 from five import grok
 from plone import api
 from plone.app.layout.viewlets.interfaces import IBelowContent
 from plone.directives import form
-from tribuna.annotator.utils import unrestricted_create
 from tribuna.annotator.interfaces import ITribunaAnnotator
+from tribuna.annotator.utils import unrestricted_create
+from zExceptions import NotFound
 from zope import schema
 from zope.interface import Interface
 from zope.publisher.interfaces import IPublishTraverse
-from zExceptions import NotFound
+from plone.dexterity.content import Item
 
 import json
 
@@ -50,6 +51,7 @@ class IAnnotation(form.Schema):
         title=u"Text",
     )
 
+    dexteritytextindexer.searchable('quote')
     quote = schema.Text(
         title=u"Quote",
     )
@@ -72,6 +74,14 @@ class IAnnotation(form.Schema):
         title=u"Ranges",
     )
 
+from zope.interface import implements
+
+
+class Annotation(Item):
+    implements(IAnnotation)
+
+    def Description(self):
+        return self.quote
 
 #class AnnotationJSONView(grok.View):
 #    """View for the Annotation content type which returns annotation data
