@@ -98,7 +98,7 @@ class Annotation(Item):
 #            'id': annotation.id,
 #            'quote': annotation.quote,
 #            'ranges': annotation.ranges,
-#            'tags': annotation.Subject,
+#            'tags': annotation.Subject(),
 #            'text': '',
 #            'updated': annotation.modified().ISO8601()
 #        }
@@ -213,49 +213,6 @@ class ManageAnnotationsView(grok.View):
             return jsonify(
                 self.request, 'No JSON sent. Annotation not created.')
 
-        # Get all 'new' tags
-        # XXX
-        # FIX
-        with api.env.adopt_user('tags_user'):
-            catalog = api.portal.get_tool(name='portal_catalog')
-            items = catalog({
-                'portal_type': 'tribuna.content.tag',
-            })
-
-        # Compare tags with the one already in our system, if they're the
-        # "same" (lower and ignore spaces), use those tags
-        titles = dict(
-            (our_unicode(it.Title).lower().replace(' ', ''), it.Title)
-            for it in items
-        )
-
-        value = data['tags']
-        dict_value = {}
-        for it in value:
-            foo = our_unicode(it).lower().replace(' ', '')
-            if foo not in dict_value.keys():
-                dict_value[foo] = it
-
-        new_value = []
-        added_values = []
-
-        for key, val in dict_value.items():
-            if key in titles.keys():
-                new_value.append(our_unicode(titles[key]))
-            else:
-                new_value.append(our_unicode(val))
-                added_values.append(our_unicode(val))
-
-        site = api.portal.get()
-        for title in added_values:
-            unrestricted_create(
-                portal_type='tribuna.content.tag',
-                title=title,
-                description="",
-                highlight_in_navigation=False,
-                container=site['tags-folder'],
-                transition='submit')
-
         # create a container for annotations, if it doesn't exist yet
         article = self._get_article(data.get('url'))
         container = article.get('annotations-folder', None)
@@ -274,6 +231,7 @@ class ManageAnnotationsView(grok.View):
             container=container,
             portal_type='tribuna.annotator.annotation',
             title=u'Annotation',
+            subject=data['tags'],
             transition='publish',
             text=data.get('text', u''),
             quote=data.get('quote', u''),
@@ -282,10 +240,6 @@ class ManageAnnotationsView(grok.View):
             consumer=data.get('consumer', u''),
             ranges=data['ranges'],
         )
-
-        with api.env.adopt_user('tags_user'):
-            annotation.setSubject(tuple(new_value))
-
         data.update({
             'created': annotation.created().ISO8601(),
             'updated': annotation.modified().ISO8601(),
