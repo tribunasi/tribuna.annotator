@@ -15,7 +15,7 @@ from plone.dexterity.content import Item
 
 import json
 
-from tribuna.content.utils import our_unicode
+from tribuna.content.utils import get_annotations
 from tribuna.content.utils import tags_string_to_list
 
 
@@ -105,6 +105,7 @@ class Annotation(Item):
 #        return jsonify(self.request, annotation_data)
 
 
+# XXX: this is tribuna specific, move it there and create a base view
 class AnnotationView(grok.View):
     grok.context(IAnnotation)
     grok.require('zope2.View')
@@ -295,26 +296,8 @@ class ManageAnnotationsView(grok.View):
 
         article = self._get_article()
         path = '/'.join(article.getPhysicalPath())
-        catalog = api.portal.get_tool('portal_catalog')
 
-        brains = catalog(
-            portal_type='tribuna.annotator.annotation',
-            path={"query": path, "depth": 2}
-        )
-        annotations = []
-        for brain in brains:
-            annotation = brain.getObject()
-            annotations.append({
-                'created': annotation.created().ISO8601(),
-                'id': annotation.UID(),
-                'quote': annotation.quote,
-                'ranges': annotation.ranges,
-                'tags': annotation.Subject(),
-                'text': annotation.text,
-                'updated': annotation.modified().ISO8601()
-            })
-
-        return annotations
+        return get_annotations(path)
 
     def _api(self):
         """Return API description in JSON format."""
