@@ -200,8 +200,11 @@ class ManageAnnotationsView(grok.View):
             consumer=data.get('consumer', u''),
             ranges=data['ranges'],
         )
-        api.content.rename(
-            obj=annotation, new_id=annotation.UID(), safe_id=True)
+        # XXX: move to tribuna related code
+        with api.env.adopt_user(username='tags_user'):
+            api.content.rename(
+                obj=annotation, new_id=annotation.UID(), safe_id=True)
+
         data.update({
             'created': annotation.created().ISO8601(),
             'updated': annotation.modified().ISO8601(),
