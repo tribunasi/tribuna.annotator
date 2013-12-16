@@ -1,3 +1,4 @@
+# To ignore these files run: svn propset svn:ignore -R -F .svnignore .
 .installed.cfg
 .mr.developer.cfg
 bin
@@ -8,4 +9,4 @@ lib
 parts
 var
 local
-
+*.egg-info
