@@ -1,7 +1,0 @@
-/annotator.egg-info
-/annotator.cfg
-/.coverage
-/cover
-/dist
-/.tox
-*.pyc
