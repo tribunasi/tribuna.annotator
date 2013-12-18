@@ -233,7 +233,6 @@ class ManageAnnotationsView(grok.View):
 
     def _get_obj_from_url(self, url):
         """Return object for the provided url."""
-        import pdb; pdb.set_trace()
         portal_url = api.portal.get().absolute_url()
         obj_path = url.replace(portal_url, '')
         # XXX: temp hack since we have "articles-folder" folder for storing
