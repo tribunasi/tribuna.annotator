@@ -8,10 +8,12 @@ Developer documentation
     :maxdepth: 2
 
     api.rst
-    glossary.rst
 
+Changelog
+=========
 
 .. include:: CHANGELOG.rst
+
 .. include:: LICENSE.rst
 
 Indices and tables

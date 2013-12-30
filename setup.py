@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """Installer for the tribuna.annotator package."""
 
 from setuptools import find_packages
@@ -25,7 +27,7 @@ setup(
         "Programming Language :: Python",
     ],
     keywords='plone annotation',
-    author='Jure Cerjak',
+    author='Termitnjak d.o.o.',
     author_email='jcerjak@termitnjak.si',
     url='http://pypi.python.org/pypi/tribuna.annotator',
     license='BSD',

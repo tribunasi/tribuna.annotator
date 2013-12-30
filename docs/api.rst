@@ -1,7 +1,8 @@
-===
-API
-===
+Content types
+=============
 
+.. automodule:: tribuna.annotator.annotation
+    :members:
 
 Miscellaneous
 =============
@@ -14,6 +15,10 @@ Miscellaneous
 .. automodule:: tribuna.annotator.interfaces
     :members:
 
+----
+
+.. automodule:: tribuna.annotator.utils
+    :members:
 
 Tests
 =====
