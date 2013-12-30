@@ -1,6 +1,6 @@
-====================
+=================
 tribuna.annotator
-====================
+=================
 
 One of the packages used for Tribuna webpage. Managed by ``tribuna.buildout``.
 
