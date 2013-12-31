@@ -9,13 +9,13 @@ more info about the plug-in.
 One of the packages used for Tribuna webpage. Managed by
 ``tribuna.buildout``. Note that this package doesn't implement all
 annotator functions like delete etc.. It also contains some Tribuna
-specific code, so it's not generic enough for all use cases. 
+specific code, so it's not generic enough for all use cases.
 
 .. NOTE::
    For a more comprehensive general annotator integration you should look into
    eea.annotator instead: https://github.com/collective/eea.annotator
 
-* `Source code @ GitHub <https://github.com/Tribuna/tribuna.annotator>`_
+* `Source code @ GitHub <https://github.com/tribunasi/tribuna.annotator>`_
 
 
 Installation
