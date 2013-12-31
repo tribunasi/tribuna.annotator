@@ -4,14 +4,15 @@ from collective import dexteritytextindexer
 from five import grok
 from plone import api
 from plone.app.layout.viewlets.interfaces import IBelowContent
+from plone.dexterity.content import Item
 from plone.directives import form
 from tribuna.annotator.interfaces import ITribunaAnnotator
 from tribuna.annotator.utils import unrestricted_create
 from zExceptions import NotFound
 from zope import schema
 from zope.interface import Interface
+from zope.interface import implements
 from zope.publisher.interfaces import IPublishTraverse
-from plone.dexterity.content import Item
 
 import json
 
@@ -72,14 +73,13 @@ class IAnnotation(form.Schema):
         title=u"Ranges",
     )
 
-from zope.interface import implements
-
 
 class Annotation(Item):
     implements(IAnnotation)
 
     def Description(self):
         return self.quote
+
 
 #class AnnotationJSONView(grok.View):
 #    """View for the Annotation content type which returns annotation data
@@ -279,31 +279,31 @@ class ManageAnnotationsView(grok.View):
                                 'desc': ("Force an index refresh after create "
                                          "(default: true)")
                             }
+                        },
+                        'desc': "Create a new annotation"
                     },
-                    'desc': "Create a new annotation"
+                    'read': {
+                        'method': 'GET',
+                        'url': url,
+                        'desc': "Get an existing annotation"
                     },
-                'read': {
-                    'method': 'GET',
-                    'url': url,
-                    'desc': "Get an existing annotation"
+                    'update': {
+                        'method': 'PUT',
+                        'url': url,
+                        'query': {
+                            'refresh': {
+                                'type': 'bool',
+                                'desc': ("Force an index refresh after update "
+                                         "(default: true)")
+                            }
+                        },
+                        'desc': "Update an existing annotation"
+                    },
+                    'delete': {
+                        'method': 'DELETE',
+                        'url': url,
+                        'desc': "Delete an annotation"
+                    }
                 },
-                'update': {
-                    'method': 'PUT',
-                    'url': url,
-                    'query': {
-                        'refresh': {
-                            'type': 'bool',
-                            'desc': ("Force an index refresh after update "
-                                     "(default: true)")
-                        }
-                    },
-                    'desc': "Update an existing annotation"
-                },
-                'delete': {
-                    'method': 'DELETE',
-                    'url': url,
-                    'desc': "Delete an annotation"
-                }
-            },
-        }
-    })
+            }
+        })

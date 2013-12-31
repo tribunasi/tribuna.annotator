@@ -16,7 +16,7 @@ def unrestricted_create(container=None, portal_type=None,
     but it doesn't seem to work properly..
 
     XXX 2: Verbose security needs to be turned on in buildout to make
-    this method work. WTF, Plone! We need to fix this.
+    this method work. WTF! We need to fix this.
 
     :param container: container for the created object
     :param portal_type: type of the object to create
