@@ -18,7 +18,7 @@ long_description = \
 
 setup(
     name='tribuna.annotator',
-    version='0.1',
+    version='0.2dev',
     description="Plone integration of jquery.annotator plugin",
     long_description=long_description,
     # Get more from http://pypi.python.org/pypi?%3Aaction=list_classifiers
